@@ -17,7 +17,9 @@
       "UF_CRM_1738589169613",
       "UF_CRM_1738589237812"
     ],
-    "filters": ["UF_CRM_1738595120961"],
+    "filters": [
+      "UF_CRM_1738595120961"
+    ],
     "labels": {
       "UF_CRM_1738595120961": "Tipo de solicitação",
       "UF_CRM_1768599404883": "Tipo de suporte",
@@ -30,5 +32,6 @@
   "comments": {
     "enabled": true,
     "hideTag": "#interno"
-  }
+  },
+  "cardNoteField": "UF_CRM_1738589149813"
 }

@@ -15,6 +15,8 @@ const fields = [
   { code: 'UF_PRODUTO', label: 'Produto', type: 'enumeration', filter: true },
   { code: 'UF_PRAZO', label: 'Previsão de entrega', type: 'date', filter: false },
   { code: 'UF_LINK', label: 'Link de referência', type: 'url', filter: false },
+  { code: 'UF_PENDENTE', label: 'Informações pendentes', type: 'string', filter: false },
+  { code: 'UF_FEITO', label: 'O que foi feito', type: 'string', filter: false },
 ];
 const tipos = ['Dúvida', 'Erro', 'Melhoria', 'Nova automação'];
 const prioridades = ['Baixa', 'Média', 'Alta'];
@@ -50,6 +52,8 @@ export function payloads(config) {
         UF_PRODUTO: produtos[i % produtos.length],
         ...(i % 3 ? { UF_PRAZO: iso(now + (i + 2) * 864e5).slice(0, 10) } : {}),
         ...(i % 5 === 0 ? { UF_LINK: 'https://exemplo.com.br/referencia' } : {}),
+        ...(stage.id === 'C17:UC_WAIT' ? { UF_PENDENTE: 'Aguardando o escritório enviar um exemplo do caso para reproduzirmos.' } : {}),
+        ...(stage.sem === 'S' ? { UF_FEITO: 'Identificamos a causa, aplicamos o ajuste na automação e validamos com um caso de teste.\nO fluxo voltou a funcionar normalmente.' } : {}),
       },
       comments: Array.from({ length: n }, (_, k) => ({
         a: equipe[(i + k) % equipe.length],
@@ -63,6 +67,8 @@ export function payloads(config) {
     generatedAt: new Date().toISOString(),
     product: config.productName || 'Suporte',
     cardField: 'TYPE_ID',
+    noteField: 'UF_PENDENTE',
+    closedDays: 90,
     stages, fields, deals,
   };
   return new Map([['demo', payload]]);

@@ -84,6 +84,8 @@ function plainText(s) {
     .replace(/\[\/?(?:\*|[a-z][a-z0-9]*)(?:=[^\]]*)?\]/gi, '')
     .replace(/<[^>]+>/g, '')
     .replace(/&(?:nbsp|amp|lt|gt|quot|#0?39);/g, (m) => ENTITIES[m])
+    .replace(/\r/g, '')
+    .replace(/^[ \t\u00a0]+|[ \t\u00a0]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -272,6 +274,8 @@ async function collect(offices) {
       generatedAt: new Date().toISOString(),
       product: config.productName || 'Suporte',
       cardField: config.cardField || 'TYPE_ID',
+      noteField: config.cardNoteField || '',
+      closedDays: Number(config.closedDays ?? 90),
       stages,
       fields: publicFields,
       deals: rows.map(([d, v]) => {
