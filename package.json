@@ -1,0 +1,12 @@
+{
+  "name": "painel-suporte",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "demo": "node scripts/build.mjs --mock && echo 'Abra http://localhost:8080 (login: demo / senha: demonstracao-2026)' && python3 -m http.server 8080 -d dist",
+    "fields": "node scripts/build.mjs --fields",
+    "new-office": "node scripts/new-office.mjs"
+  }
+}

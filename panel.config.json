@@ -1,0 +1,34 @@
+{
+  "categoryId": 17,
+  "productName": "Suporte",
+  "officeField": "UF_CRM_1727986045102",
+  "titleField": "UF_CRM_1630513407394",
+  "descField": "UF_CRM_1630513407394",
+  "cardField": "UF_CRM_1738595120961",
+  "closedDays": 90,
+  "fields": {
+    "standard": [],
+    "exclude": [],
+    "only": [
+      "UF_CRM_1738595120961",
+      "UF_CRM_1768599404883",
+      "UF_CRM_1739555538272",
+      "UF_CRM_1738589149813",
+      "UF_CRM_1738589169613",
+      "UF_CRM_1738589237812"
+    ],
+    "filters": ["UF_CRM_1738595120961"],
+    "labels": {
+      "UF_CRM_1738595120961": "Tipo de solicitação",
+      "UF_CRM_1768599404883": "Tipo de suporte",
+      "UF_CRM_1739555538272": "Reaberto",
+      "UF_CRM_1738589149813": "Informações pendentes",
+      "UF_CRM_1738589169613": "O que foi feito",
+      "UF_CRM_1738589237812": "Motivo de não realização"
+    }
+  },
+  "comments": {
+    "enabled": true,
+    "hideTag": "#interno"
+  }
+}
