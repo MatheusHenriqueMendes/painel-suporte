@@ -519,7 +519,7 @@ const filtrados = () => dados.deals.filter((d) => passa(d)).sort(ORDENS[ordem]);
 function cabecalho() {
   $('#escritorio').textContent = dados.office.name;
   $('#produto').textContent = dados.product;
-  $('#atualizado').textContent = `Atualizado ${relativo(dados.generatedAt)} (${data(dados.generatedAt, true)}). Os dados se renovam a cada 15 minutos.`;
+  $('#atualizado').textContent = `Dados atualizados ${relativo(dados.generatedAt)} (${data(dados.generatedAt, true)}).`;
   document.title = `${dados.product} | ${dados.office.name}`;
 }
 function renderKpis() {
