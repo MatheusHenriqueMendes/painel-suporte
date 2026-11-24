@@ -258,6 +258,30 @@ async function collect(offices) {
   }
 
   const ctx = { statuses, users };
+
+  // prioridade (matriz) e prazo estimado pelo SLA, calculados a partir dos campos do negócio
+  const enumLabel = (code, raw) => {
+    if (!code || raw === null || raw === undefined || raw === '') return '';
+    return String(dealFields[code]?.items?.find((i) => String(i.ID) === String(raw))?.VALUE ?? raw).trim();
+  };
+  const priorityOf = (d) => {
+    const pc = config.priority;
+    const n = Number(/\d/.exec(enumLabel(pc?.field, d[pc?.field]))?.[0] || 0);
+    return pc?.levels?.[n] ? n : 0;
+  };
+  const slaOf = (d) => {
+    const sc = config.sla;
+    if (!sc?.typeField) return null;
+    const type = enumLabel(sc.typeField, d[sc.typeField]).toLowerCase();
+    const rule = (sc.rules || []).find((r) => type.startsWith(r.type.toLowerCase()));
+    if (!rule) return null;
+    const size = enumLabel(sc.sizeField, d[sc.sizeField]);
+    const val = rule.sizes?.[size] ?? rule.default;
+    const base = { type: rule.type, size: sc.sizeNames?.[size] || '', note: rule.note || '' };
+    if (val === undefined || val === null) return { ...base, pending: true };
+    const [min, max = min] = [].concat(val);
+    return { ...base, min, max };
+  };
   const payloads = new Map();
   for (const office of offices) {
     const mine = deals.filter((d) => office.companyIds.includes(Number(d.COMPANY_ID))
@@ -276,6 +300,8 @@ async function collect(offices) {
       cardField: config.cardField || 'TYPE_ID',
       noteField: config.cardNoteField || '',
       closedDays: Number(config.closedDays ?? 90),
+      priority: config.priority ? { label: config.priority.label || 'Prioridade', levels: config.priority.levels } : null,
+      sla: config.sla ? { legend: config.sla.legend || [], footnote: config.sla.footnote || '' } : null,
       stages,
       fields: publicFields,
       deals: rows.map(([d, v]) => {
@@ -288,6 +314,8 @@ async function collect(offices) {
           created: d.DATE_CREATE,
           modified: d.DATE_MODIFY,
           desc: plainText(d[config.descField]) || plainText(d.COMMENTS),
+          pri: priorityOf(d),
+          sla: slaOf(d),
           v,
           comments: (comments[d.ID] || []).map((c) => ({ a: users[c.AUTHOR_ID] || 'Equipe de suporte', d: c.CREATED, t: plainText(c.COMMENT) })).filter((c) => c.t),
         };

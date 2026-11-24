@@ -140,6 +140,22 @@ svg.ic { width: 14px; height: 14px; flex: none; stroke: currentColor; fill: none
 .chip--etapa i { width: 8px; height: 8px; border-radius: 50%; background: var(--cor, var(--ae-border-strong)); flex: none; }
 .chip--S { background: var(--ae-success-soft); color: var(--ae-success); }
 .chip--F { background: var(--ae-danger-soft); color: var(--ae-danger); }
+.pri { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px 2px 7px; border-radius: 6px; font-size: 11.5px; font-weight: 700; line-height: 1.5; white-space: nowrap; background: var(--ae-surface-2); color: var(--ae-text-soft); }
+.pri b { display: inline-grid; place-items: center; min-width: 16px; height: 16px; border-radius: 4px; background: currentColor; font-size: 10.5px; font-weight: 800; }
+.pri b span { color: var(--ae-surface); }
+.pri--1 { background: var(--ae-danger-soft); color: var(--ae-danger); }
+.pri--2 { background: var(--t1-bg); color: var(--t1-ink); }
+.pri--3 { background: var(--t4-bg); color: var(--t4-ink); }
+.pri--4 { background: var(--t5-bg); color: var(--t5-ink); }
+.sla { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--ae-text-soft); white-space: nowrap; }
+.card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
+.duo p { margin: 6px 0 0; color: var(--ae-text-soft); font-size: 13px; line-height: 1.55; }
+.duo strong { display: block; margin-top: 6px; font-size: 17px; font-weight: 800; letter-spacing: -.01em; color: var(--ae-brand); }
+.legenda { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.legenda li { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: start; color: var(--ae-text-soft); font-size: 13.5px; }
+.lista-simples { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13.5px; }
+.linha .direita { margin-left: auto; }
 .avatar { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ae-info-soft); color: var(--ae-info); font-size: 10px; font-weight: 800; flex: none; letter-spacing: .02em; }
 
 /* ---------- kanban ---------- */
@@ -166,7 +182,14 @@ svg.ic { width: 14px; height: 14px; flex: none; stroke: currentColor; fill: none
 .card__nota { display: flex; gap: 6px; align-items: flex-start; background: var(--ae-warn-soft); color: var(--ae-warn); border-radius: 6px; padding: 6px 8px; font-size: 12px; font-weight: 500; line-height: 1.4; }
 .card__nota span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .card__nota svg { margin-top: 2px; }
-.card__rodape { display: flex; align-items: center; gap: 8px; color: var(--ae-text-soft); font-size: 12px; padding-top: 9px; border-top: 1px solid var(--ae-border); }
+.card__pessoas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-top: 9px; border-top: 1px solid var(--ae-border); }
+.card__pessoa { display: grid; gap: 3px; min-width: 0; }
+.card__pessoa small { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ae-text-faint); }
+.card__pessoa span { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12.5px; font-weight: 500; }
+.card__pessoa span span:not(.avatar) { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card__pessoa .avatar { width: 22px; height: 22px; font-size: 9.5px; }
+.avatar--equipe { background: var(--ae-pink-soft); color: var(--ae-pink-ink); }
+.card__rodape { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ae-text-soft); font-size: 12px; }
 .card__quem { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card__info { display: inline-flex; align-items: center; gap: 4px; flex: none; }
 
@@ -230,7 +253,8 @@ a { color: var(--ae-pink-ink); }
   .barra .empurra { margin-left: 0; width: 100%; justify-content: space-between; }
   .col { flex-basis: 84vw; max-height: none; }
   .col__lista { overflow: visible; }
-  .dados { grid-template-columns: 1fr; }
+  .dados, .duo { grid-template-columns: 1fr; }
+  .legenda li { grid-template-columns: 1fr; gap: 4px; }
   .gav__cab, .gav__corpo { padding-left: 16px; padding-right: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
@@ -334,6 +358,7 @@ const IC = {
   busca: '<svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   coment: '<svg class="ic" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/></svg>',
   relogio: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  prazo: '<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4m8-4v4"/></svg>',
   alerta: '<svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A2 2 0 0 0 4.1 20.5h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
 };
 
@@ -344,7 +369,7 @@ let maisAberto = false;
 let ordem = 'recentes';
 let ordemLista = null; // { col, dir }
 const limite = {};
-const filtros = { q: '', contato: '', situacao: '', desde: '', campos: {} };
+const filtros = { q: '', contato: '', resp: '', pri: '', situacao: '', desde: '', campos: {} };
 
 // ---------- acesso aos dados ----------
 async function arquivoDe(login) {
@@ -446,6 +471,14 @@ function chipTipo(d) {
   return `<span class="chip chip--t${tom(t)}">${esc(t)}</span>`;
 }
 const chipEtapa = (s) => `<span class="chip chip--etapa${s.sem !== 'P' ? ' chip--' + esc(s.sem) : ''}" style="--cor:${cor(s.color)}">${s.sem === 'P' ? '<i></i>' : ''}${esc(s.name)}</span>`;
+const nivel = (d) => (d.pri && dados.priority?.levels?.[d.pri]) || null;
+const priHtml = (d) => { const n = nivel(d); return n ? `<span class="pri pri--${d.pri}" title="${esc(dados.priority.label)} ${d.pri}: ${esc(n.desc)}"><b><span>${d.pri}</span></b>${esc(n.short)}</span>` : ''; };
+function slaTexto(s) {
+  if (!s) return '';
+  if (s.pending) return 'a definir na triagem';
+  const u = (n) => (n === 1 ? 'dia útil' : 'dias úteis');
+  return s.min === s.max ? `até ${s.max} ${u(s.max)}` : `${s.min} a ${s.max} dias úteis`;
+}
 const notaDe = (d) => { const n = dados.noteField && d.v[dados.noteField]; return n && etapaDe(d.stage).sem === 'P' ? [].concat(n).join(', ') : ''; };
 
 // ---------- filtros ----------
@@ -461,6 +494,8 @@ function seletor(id, rotulo, lista, compacto) {
 }
 function listaFiltros() {
   const out = [{ id: 'contato', rotulo: 'Solicitante', lista: opcoes(dados.deals.map((d) => d.contact)) }];
+  out.push({ id: 'resp', rotulo: 'Responsável', lista: opcoes(dados.deals.map((d) => d.assigned)) });
+  if (dados.priority) out.push({ id: 'pri', rotulo: dados.priority.label, lista: Object.keys(dados.priority.levels).filter((n) => dados.deals.some((d) => d.pri === Number(n))).map((n) => `${n} · ${dados.priority.levels[n].short}`) });
   for (const f of dados.fields.filter((x) => x.filter)) {
     out.push({ id: 'c:' + f.code, rotulo: f.label, lista: opcoes(dados.deals.map((d) => d.v[f.code] ?? [])), tipo: f.code === dados.cardField });
   }
@@ -477,7 +512,7 @@ function montarBarra() {
     <button class="btn" type="button" id="btn-mais" aria-expanded="${maisAberto}">Mais filtros${nExtras ? ` <span class="conta num">${nExtras}</span>` : ''}</button>
     <div class="empurra">
       <select class="ctrl" id="ordem" aria-label="Ordenar" style="width:auto">
-        ${[['recentes', 'Atualizados recentemente'], ['novos', 'Abertos mais recentes'], ['antigos', 'Abertos há mais tempo']].map(([v, t]) => `<option value="${v}"${v === ordem ? ' selected' : ''}>${t}</option>`).join('')}
+        ${[['recentes', 'Atualizados recentemente'], ['novos', 'Abertos mais recentes'], ['antigos', 'Abertos há mais tempo'], ...(dados.priority ? [['prioridade', 'Maior prioridade']] : [])].map(([v, t]) => `<option value="${v}"${v === ordem ? ' selected' : ''}>${t}</option>`).join('')}
       </select>
       <div class="seg" role="group" aria-label="Visualização">
         <button type="button" data-visao="kanban" aria-pressed="${visao === 'kanban'}">Kanban</button>
@@ -498,6 +533,8 @@ function aplicarFiltro(el) {
 }
 function passa(d, ignorarSituacao) {
   if (filtros.contato && d.contact !== filtros.contato) return false;
+  if (filtros.resp && d.assigned !== filtros.resp) return false;
+  if (filtros.pri && d.pri !== parseInt(filtros.pri, 10)) return false;
   if (!ignorarSituacao && filtros.situacao && etapaDe(d.stage).sem !== filtros.situacao) return false;
   if (filtros.desde && new Date(d.created).getTime() < new Date(filtros.desde + 'T00:00:00').getTime()) return false;
   for (const [code, v] of Object.entries(filtros.campos)) if (v && ![].concat(d.v[code] ?? []).includes(v)) return false;
@@ -512,6 +549,7 @@ const ORDENS = {
   recentes: (a, b) => new Date(b.modified) - new Date(a.modified),
   novos: (a, b) => new Date(b.created) - new Date(a.created),
   antigos: (a, b) => new Date(a.created) - new Date(b.created),
+  prioridade: (a, b) => (a.pri || 9) - (b.pri || 9) || new Date(a.created) - new Date(b.created),
 };
 const filtrados = () => dados.deals.filter((d) => passa(d)).sort(ORDENS[ordem]);
 
@@ -535,11 +573,14 @@ function renderLinha(lista) {
   const ativos = [];
   if (filtros.q) ativos.push(['q', `Busca: ${filtros.q}`]);
   if (filtros.contato) ativos.push(['contato', `Solicitante: ${filtros.contato}`]);
+  if (filtros.resp) ativos.push(['resp', `Responsável: ${filtros.resp}`]);
+  if (filtros.pri) ativos.push(['pri', `${dados.priority.label}: ${filtros.pri}`]);
   if (filtros.desde) ativos.push(['desde', `Desde ${data(filtros.desde)}`]);
   for (const [code, v] of Object.entries(filtros.campos)) if (v) ativos.push(['c:' + code, `${dados.fields.find((f) => f.code === code)?.label || code}: ${v}`]);
   $('#linha').innerHTML = `<span><b class="num">${lista.length}</b> ${lista.length === 1 ? 'chamado' : 'chamados'}</span>
     ${ativos.map(([k, t]) => `<button class="ativo" type="button" data-limpar="${esc(k)}" title="Remover filtro">${esc(t)}<span aria-hidden="true">×</span></button>`).join('')}
-    ${ativos.length > 1 ? '<button class="link" type="button" data-limpar="*">Limpar tudo</button>' : ''}`;
+    ${ativos.length > 1 ? '<button class="link" type="button" data-limpar="*">Limpar tudo</button>' : ''}
+    ${dados.priority || dados.sla ? '<button class="link direita" type="button" id="btn-regras">Entenda prioridades e prazos</button>' : ''}`;
 }
 function cardHtml(d) {
   const nota = notaDe(d);
@@ -547,11 +588,14 @@ function cardHtml(d) {
   return `<button class="card" type="button" data-id="${d.id}">
     <span class="card__topo">${chipTipo(d)}<span class="card__id num">#${d.id}</span></span>
     <span class="card__titulo">${esc(d.title)}</span>
+    ${!fechado && (nivel(d) || d.sla) ? `<span class="card__meta">${priHtml(d)}${d.sla ? `<span class="sla" title="Prazo estimado pelo SLA">${IC.prazo}Prazo ${esc(slaTexto(d.sla))}</span>` : ''}</span>` : ''}
     ${nota ? `<span class="card__nota">${IC.alerta}<span>${esc(nota)}</span></span>` : ''}
+    <span class="card__pessoas">
+      <span class="card__pessoa"><small>Solicitante</small><span><span class="avatar" aria-hidden="true">${esc(iniciais(d.contact))}</span><span>${esc(d.contact || 'Não informado')}</span></span></span>
+      <span class="card__pessoa"><small>Responsável</small><span><span class="avatar avatar--equipe" aria-hidden="true">${esc(iniciais(d.assigned))}</span><span>${esc(d.assigned || 'A definir')}</span></span></span>
+    </span>
     <span class="card__rodape">
-      <span class="avatar" aria-hidden="true">${esc(iniciais(d.contact))}</span>
-      <span class="card__quem">${esc(d.contact || 'Sem solicitante')}</span>
-      ${d.comments.length ? `<span class="card__info num" title="${d.comments.length} comentário(s)">${IC.coment}${d.comments.length}</span>` : ''}
+      <span class="card__info num">${d.comments.length ? `${IC.coment}${d.comments.length} ${d.comments.length === 1 ? 'comentário' : 'comentários'}` : ''}</span>
       <span class="card__info num" title="${fechado ? 'Atualizado em ' + esc(data(d.modified, true)) : 'Aberto em ' + esc(data(d.created, true))}">${IC.relogio}${esc(relativo(fechado ? d.modified : d.created))}</span>
     </span>
   </button>`;
@@ -580,8 +624,8 @@ function render() {
       </section>`;
     }).join('')}</div>`;
   } else {
-    const cols = [['id', 'Nº'], ['title', 'Chamado'], ['etapa', 'Etapa'], ['tipo', 'Tipo'], ['contact', 'Solicitante'], ['created', 'Aberto'], ['modified', 'Atualizado']];
-    const chave = { id: (d) => d.id, title: (d) => d.title.toLowerCase(), etapa: (d) => dados.stages.findIndex((s) => s.id === d.stage), tipo: (d) => String(d.v[dados.cardField] ?? ''), contact: (d) => d.contact.toLowerCase(), created: (d) => new Date(d.created).getTime(), modified: (d) => new Date(d.modified).getTime() };
+    const cols = [['id', 'Nº'], ['title', 'Chamado'], ['etapa', 'Etapa'], ['tipo', 'Tipo'], ['contact', 'Solicitante'], ['assigned', 'Responsável'], ['pri', 'Prioridade'], ['created', 'Aberto'], ['modified', 'Atualizado']];
+    const chave = { id: (d) => d.id, title: (d) => d.title.toLowerCase(), etapa: (d) => dados.stages.findIndex((s) => s.id === d.stage), tipo: (d) => String(d.v[dados.cardField] ?? ''), contact: (d) => d.contact.toLowerCase(), assigned: (d) => d.assigned.toLowerCase(), pri: (d) => d.pri || 9, created: (d) => new Date(d.created).getTime(), modified: (d) => new Date(d.modified).getTime() };
     const linhas = [...lista];
     if (ordemLista) { const k = chave[ordemLista.col]; linhas.sort((a, b) => (k(a) > k(b) ? 1 : k(a) < k(b) ? -1 : 0) * ordemLista.dir); }
     const max = limite.lista || 100;
@@ -590,7 +634,7 @@ function render() {
       <tbody>${linhas.slice(0, max).map((d) => { const s = etapaDe(d.stage); return `<tr data-id="${d.id}" tabindex="0">
         <td class="num nowrap">#${d.id}</td><td class="t-titulo"><div>${esc(d.title)}</div></td>
         <td class="nowrap">${chipEtapa(s)}</td><td class="nowrap">${chipTipo(d)}</td>
-        <td class="nowrap">${esc(d.contact)}</td><td class="num nowrap">${esc(data(d.created))}</td><td class="num nowrap" title="${esc(data(d.modified, true))}">${esc(relativo(d.modified))}</td></tr>`; }).join('')}</tbody>
+        <td class="nowrap">${esc(d.contact)}</td><td class="nowrap">${esc(d.assigned)}</td><td class="nowrap">${priHtml(d)}</td><td class="num nowrap">${esc(data(d.created))}</td><td class="num nowrap" title="${esc(data(d.modified, true))}">${esc(relativo(d.modified))}</td></tr>`; }).join('')}</tbody>
     </table></div>
     ${linhas.length > max ? `<p style="text-align:center;margin-top:12px"><button class="btn" type="button" data-mais="lista">Mostrar mais 100 de ${linhas.length - max}</button></p>` : ''}`;
   }
@@ -608,7 +652,7 @@ function abrirChamado(id, semHash) {
   const curtos = dados.fields.filter((f) => d.v[f.code] !== undefined && !longo(d.v[f.code]) && f.code !== dados.noteField && f.type !== 'boolean');
   const longos = dados.fields.filter((f) => d.v[f.code] !== undefined && longo(d.v[f.code]) && f.code !== dados.noteField);
   const item = (rot, html) => (html ? `<div><dt class="rotulo">${esc(rot)}</dt><dd>${html}</dd></div>` : '');
-  const pessoa = (nome) => (nome ? `<span class="avatar" aria-hidden="true">${esc(iniciais(nome))}</span>${esc(nome)}` : '');
+  const pessoa = (nome, equipe) => (nome ? `<span class="avatar${equipe ? ' avatar--equipe' : ''}" aria-hidden="true">${esc(iniciais(nome))}</span>${esc(nome)}` : '');
   const progresso = s.sem === 'S'
     ? `<div class="progresso"><div class="progresso__txt"><span>Chamado concluído</span></div><div class="etapas ok"><i></i></div></div>`
     : s.sem === 'P' && pos >= 0
@@ -625,9 +669,14 @@ function abrirChamado(id, semHash) {
     </div>
     <div class="gav__corpo">
       ${nota ? `<section class="bloco bloco--alerta"><span class="rotulo">${esc(dados.fields.find((f) => f.code === dados.noteField)?.label || 'Atenção')}</span><p class="texto">${esc(nota)}</p></section>` : ''}
+      ${nivel(d) || d.sla ? `<section class="bloco"><div class="duo">
+        ${nivel(d) ? `<div><span class="rotulo">${esc(dados.priority.label)}</span><div style="margin-top:6px">${priHtml(d)}</div><p>${esc(nivel(d).desc)}</p></div>` : ''}
+        ${d.sla ? `<div><span class="rotulo">Prazo estimado (SLA)</span><strong>${esc(slaTexto(d.sla))}</strong>
+          <p>${esc([d.sla.type, d.sla.size].filter(Boolean).join(' de '))}${d.sla.note ? '. ' + esc(d.sla.note) : d.sla.pending ? '. O prazo é definido quando o porte da demanda for classificado.' : '.'}</p></div>` : ''}
+      </div><p style="margin:12px 0 0"><button class="link" type="button" data-regras>Entenda prioridades e prazos</button></p></section>` : ''}
       <section class="bloco"><dl class="dados">
         ${item('Solicitante', pessoa(d.contact))}
-        ${item('Responsável', pessoa(d.assigned))}
+        ${item('Responsável', pessoa(d.assigned, true))}
         ${item('Aberto em', esc(data(d.created, true)))}
         ${item('Última atualização', esc(data(d.modified, true)))}
         ${curtos.filter((f) => f.code !== dados.cardField).map((f) => item(f.label, valor(f, d.v[f.code]))).join('')}
@@ -644,6 +693,25 @@ function abrirChamado(id, semHash) {
   if (!g.open) g.showModal();
   g.scrollTop = 0;
   if (!semHash) history.replaceState(null, '', '#chamado=' + d.id);
+}
+function abrirRegras() {
+  const p = dados.priority, s = dados.sla;
+  $('#gaveta').innerHTML = `
+    <div class="gav__cab">
+      <div class="gav__linha"><span class="rotulo">Como funciona</span><div><button class="btn" type="button" data-fechar>Fechar</button></div></div>
+      <h2 id="gav-titulo" style="margin:0">Prioridades e prazos</h2>
+    </div>
+    <div class="gav__corpo">
+      ${p ? `<section class="bloco"><span class="rotulo">Regra de priorização</span>
+        <p class="texto" style="margin-bottom:14px;font-size:13.5px;color:var(--ae-text-soft)">Cada chamado é classificado pela importância e pela urgência. A fila de atendimento segue esta ordem:</p>
+        <ul class="legenda">${Object.entries(p.levels).map(([n, l]) => `<li><span><span class="pri pri--${esc(n)}"><b><span>${esc(n)}</span></b>${esc(l.short)}</span></span><span>${esc(l.desc)}</span></li>`).join('')}</ul></section>` : ''}
+      ${s && s.legend.length ? `<section class="bloco"><span class="rotulo">Prazos estimados (SLA)</span>
+        <ul class="lista-simples">${s.legend.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
+        ${s.footnote ? `<p class="texto" style="margin-top:12px;font-size:13px;color:var(--ae-text-soft)">${esc(s.footnote)}</p>` : ''}</section>` : ''}
+    </div>`;
+  const g = $('#gaveta');
+  if (!g.open) g.showModal();
+  g.scrollTop = 0;
 }
 function toast(msg) {
   document.querySelector('.toast')?.remove();
@@ -705,10 +773,11 @@ $('#kpis').addEventListener('click', (e) => {
   render();
 });
 $('#linha').addEventListener('click', (e) => {
+  if (e.target.closest('#btn-regras')) { abrirRegras(); return; }
   const b = e.target.closest('[data-limpar]');
   if (!b) return;
   const k = b.dataset.limpar;
-  if (k === '*') Object.assign(filtros, { q: '', contato: '', desde: '', campos: {} });
+  if (k === '*') Object.assign(filtros, { q: '', contato: '', resp: '', pri: '', desde: '', campos: {} });
   else if (k.startsWith('c:')) filtros.campos[k.slice(2)] = ''; else filtros[k] = '';
   montarBarra(); render();
 });
@@ -723,6 +792,7 @@ $('#conteudo').addEventListener('click', (e) => {
 $('#conteudo').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches('tr[data-id]')) abrirChamado(e.target.dataset.id); });
 $('#gaveta').addEventListener('click', async (e) => {
   if (e.target === e.currentTarget || e.target.closest('[data-fechar]')) { e.currentTarget.close(); return; }
+  if (e.target.closest('[data-regras]')) { abrirRegras(); return; }
   const c = e.target.closest('[data-copiar]');
   if (c) {
     const url = location.href.split('#')[0] + '#chamado=' + c.dataset.copiar;

@@ -33,5 +33,87 @@
     "enabled": true,
     "hideTag": "#interno"
   },
-  "cardNoteField": "UF_CRM_1738589149813"
+  "cardNoteField": "UF_CRM_1738589149813",
+  "priority": {
+    "field": "UF_CRM_1679591736273",
+    "label": "Prioridade",
+    "levels": {
+      "1": {
+        "short": "Imediata",
+        "desc": "Impacto negativo, importante e urgente: é feito imediatamente."
+      },
+      "2": {
+        "short": "Alta",
+        "desc": "Importante e urgente: é feito agora, logo após as demandas imediatas."
+      },
+      "3": {
+        "short": "Normal",
+        "desc": "Importante, mas não urgente: é feito assim que possível."
+      },
+      "4": {
+        "short": "Agendada",
+        "desc": "Urgente, mas não importante: tem a execução agendada."
+      },
+      "5": {
+        "short": "Sem prioridade",
+        "desc": "Nem importante nem urgente: entra na fila quando houver disponibilidade."
+      }
+    }
+  },
+  "sla": {
+    "typeField": "UF_CRM_1738595120961",
+    "sizeField": "UF_CRM_1749061604718",
+    "sizeNames": {
+      "Pequeno": "pequeno porte",
+      "Médio": "médio porte",
+      "Demorado": "grande porte"
+    },
+    "rules": [
+      {
+        "type": "Alteração",
+        "sizes": {
+          "Pequeno": 1,
+          "Médio": 5,
+          "Demorado": 10
+        }
+      },
+      {
+        "type": "Criação",
+        "sizes": {
+          "Pequeno": 1,
+          "Médio": 10,
+          "Demorado": 20
+        }
+      },
+      {
+        "type": "Erro",
+        "sizes": {
+          "Pequeno": 1
+        },
+        "default": [
+          1,
+          5
+        ],
+        "note": "Em regra 1 dia útil; até 5 quando exige ajustes em vários locais ou alinhamento entre setores."
+      },
+      {
+        "type": "Pergunta",
+        "default": 1,
+        "note": "Pode se estender se depender de resposta do Bitrix24."
+      },
+      {
+        "type": "Sugestão",
+        "default": 3,
+        "note": "Prazo para análise de viabilidade técnica."
+      }
+    ],
+    "legend": [
+      "Alteração: pequena 1 dia útil, média 5, grande 10.",
+      "Criação: pequena 1 dia útil, média 10, grande 20.",
+      "Erro: em regra 1 dia útil; de 1 a 5 quando exige ajustes em vários locais.",
+      "Pergunta: 1 dia útil.",
+      "Sugestão: 3 dias úteis para análise de viabilidade."
+    ],
+    "footnote": "Os prazos contam a partir da abertura e podem ser suspensos enquanto aguardamos informações, validação ou resposta do Bitrix24. Direcionamentos incorretos reiniciam o prazo."
+  }
 }

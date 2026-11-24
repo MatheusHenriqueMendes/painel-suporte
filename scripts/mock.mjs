@@ -45,6 +45,8 @@ export function payloads(config) {
       assigned: equipe[i % equipe.length],
       created: iso(created),
       modified: iso(created + 5e7 + i * 3e6),
+      pri: (i % 5) + 1,
+      sla: i % 4 === 3 ? null : { type: 'Alteração', size: ['pequeno porte', 'médio porte', 'grande porte'][i % 3], note: '', min: [1, 5, 10][i % 3], max: [1, 5, 10][i % 3] },
       desc: `Solicitação registrada pelo escritório.\n\n${title}. Segue o detalhamento enviado pelo solicitante para análise da equipe.`,
       v: {
         TYPE_ID: tipos[i % tipos.length],
@@ -69,6 +71,8 @@ export function payloads(config) {
     cardField: 'TYPE_ID',
     noteField: 'UF_PENDENTE',
     closedDays: 90,
+    priority: config.priority ? { label: config.priority.label, levels: config.priority.levels } : null,
+    sla: config.sla ? { legend: config.sla.legend, footnote: config.sla.footnote } : null,
     stages, fields, deals,
   };
   return new Map([['demo', payload]]);
