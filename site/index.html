@@ -519,7 +519,7 @@ function campoFiltro(id) { return id.startsWith('c:') ? filtros.campos[id.slice(
 function seletor(id, rotulo, lista, compacto) {
   const atual = campoFiltro(id);
   const sel = `<select class="${compacto ? 'ctrl' : ''}" data-f="${esc(id)}" aria-label="${esc(rotulo)}">
-    <option value="">${compacto ? esc(rotulo) + ': todos' : 'Todos'}</option>${lista.map((o) => `<option${o === atual ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    <option value="">${compacto ? esc(rotulo) + ': todos' : 'Todos'}</option>${lista.map((o) => `<option value="${esc(o)}"${o === atual ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
   return compacto ? sel : `<label class="campo"><span class="rotulo">${esc(rotulo)}</span>${sel}</label>`;
 }
 function listaFiltros() {

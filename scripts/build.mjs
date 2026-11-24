@@ -93,7 +93,7 @@ function shortTitle(raw) {
   const line = plainText(raw).split('\n').find((l) => l.trim())?.trim() || '';
   return line.length > 110 ? line.slice(0, 107).trimEnd() + '…' : line;
 }
-const personName = (p) => [p?.NAME, p?.LAST_NAME].filter(Boolean).join(' ').trim();
+const personName = (p) => [p?.NAME, p?.LAST_NAME].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
 // ---------------------------------------------------------------- campos
 const SKIP_TYPES = new Set(['file', 'crm', 'crm_entity', 'crm_category', 'crm_company', 'crm_contact', 'iblock_section', 'iblock_element', 'resourcebooking', 'object', 'attached_diskfile']);
