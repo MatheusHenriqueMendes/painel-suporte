@@ -148,6 +148,11 @@ svg.ic { width: 14px; height: 14px; flex: none; stroke: currentColor; fill: none
 .pri--3 { background: var(--t4-bg); color: var(--t4-ink); }
 .pri--4 { background: var(--t5-bg); color: var(--t5-ink); }
 .sla { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--ae-text-soft); white-space: nowrap; }
+.venc { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 6px; font-size: 11.5px; font-weight: 700; line-height: 1.5; white-space: nowrap; background: var(--ae-success-soft); color: var(--ae-success); }
+.venc--atrasado { background: var(--ae-danger-soft); color: var(--ae-danger); }
+.venc--hoje, .venc--perto { background: var(--ae-warn-soft); color: var(--ae-warn); }
+.venc--suspenso { background: var(--ae-surface-2); color: var(--ae-text-soft); }
+.card__prazo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .card__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 18px; }
 .duo p { margin: 6px 0 0; color: var(--ae-text-soft); font-size: 13px; line-height: 1.55; }
@@ -369,7 +374,7 @@ let maisAberto = false;
 let ordem = 'recentes';
 let ordemLista = null; // { col, dir }
 const limite = {};
-const filtros = { q: '', contato: '', resp: '', pri: '', situacao: '', desde: '', campos: {} };
+const filtros = { q: '', contato: '', resp: '', prazo: '', pri: '', situacao: '', desde: '', campos: {} };
 
 // ---------- acesso aos dados ----------
 async function arquivoDe(login) {
@@ -479,6 +484,31 @@ function slaTexto(s) {
   const u = (n) => (n === 1 ? 'dia útil' : 'dias úteis');
   return s.min === s.max ? `até ${s.max} ${u(s.max)}` : `${s.min} a ${s.max} dias úteis`;
 }
+// ---------- vencimento pelo SLA ----------
+const hojeStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+function diaUtil(str) {
+  const w = new Date(str + 'T12:00:00Z').getUTCDay();
+  const fer = dados.sla?.holidays || [];
+  return w !== 0 && w !== 6 && !fer.includes(str) && !fer.includes(str.slice(5));
+}
+function uteisEntre(a, b) { // dias úteis em (a, b]
+  let n = 0;
+  for (let t = Date.parse(a + 'T12:00:00Z') + 864e5, fim = Date.parse(b + 'T12:00:00Z'); t <= fim; t += 864e5) if (diaUtil(new Date(t).toISOString().slice(0, 10))) n++;
+  return n;
+}
+function vencimento(d) {
+  const s = d.sla;
+  if (!s || !s.due || etapaDe(d.stage).sem !== 'P') return null;
+  const du = (n) => `${n} ${n === 1 ? 'dia útil' : 'dias úteis'}`;
+  if (s.paused) return { tipo: 'suspenso', ordem: 5000, curto: 'Prazo suspenso', longo: `Contagem suspensa enquanto o chamado está em "${etapaDe(d.stage).name}".` };
+  const hoje = hojeStr();
+  if (s.due < hoje) { const n = uteisEntre(s.due, hoje); return { tipo: 'atrasado', ordem: -n, curto: `Atrasado ${du(n)}`, longo: `Venceu em ${data(s.due)}, há ${du(n)}.` }; }
+  if (s.due === hoje) return { tipo: 'hoje', ordem: 0, curto: 'Vence hoje', longo: `Vence hoje, ${data(s.due)}.` };
+  const n = uteisEntre(hoje, s.due);
+  return { tipo: n <= 1 ? 'perto' : 'ok', ordem: n, curto: `Vence ${data(s.due).slice(0, 5)}`, longo: `Vence em ${data(s.due)}: ${n === 1 ? 'resta' : 'restam'} ${du(n)}.` };
+}
+const ROTULO_PRAZO = { atrasado: 'Atrasados', hoje: 'Vencem hoje', perto: 'Vencem em 1 dia útil', ok: 'No prazo', suspenso: 'Prazo suspenso' };
+const vencHtml = (d) => { const v = vencimento(d); return v ? `<span class="venc venc--${v.tipo}" title="${esc(v.longo)}">${esc(v.curto)}</span>` : ''; };
 const notaDe = (d) => { const n = dados.noteField && d.v[dados.noteField]; return n && etapaDe(d.stage).sem === 'P' ? [].concat(n).join(', ') : ''; };
 
 // ---------- filtros ----------
@@ -495,6 +525,8 @@ function seletor(id, rotulo, lista, compacto) {
 function listaFiltros() {
   const out = [{ id: 'contato', rotulo: 'Solicitante', lista: opcoes(dados.deals.map((d) => d.contact)) }];
   out.push({ id: 'resp', rotulo: 'Responsável', lista: opcoes(dados.deals.map((d) => d.assigned)) });
+  const prazos = [...new Set(dados.deals.map((d) => vencimento(d)?.tipo).filter(Boolean))];
+  if (prazos.length) out.push({ id: 'prazo', rotulo: 'Situação do prazo', lista: Object.keys(ROTULO_PRAZO).filter((k) => prazos.includes(k)).map((k) => ROTULO_PRAZO[k]), semOrdem: true });
   if (dados.priority) out.push({ id: 'pri', rotulo: dados.priority.label, lista: Object.keys(dados.priority.levels).filter((n) => dados.deals.some((d) => d.pri === Number(n))).map((n) => `${n} · ${dados.priority.levels[n].short}`) });
   for (const f of dados.fields.filter((x) => x.filter)) {
     out.push({ id: 'c:' + f.code, rotulo: f.label, lista: opcoes(dados.deals.map((d) => d.v[f.code] ?? [])), tipo: f.code === dados.cardField });
@@ -512,7 +544,7 @@ function montarBarra() {
     <button class="btn" type="button" id="btn-mais" aria-expanded="${maisAberto}">Mais filtros${nExtras ? ` <span class="conta num">${nExtras}</span>` : ''}</button>
     <div class="empurra">
       <select class="ctrl" id="ordem" aria-label="Ordenar" style="width:auto">
-        ${[['recentes', 'Atualizados recentemente'], ['novos', 'Abertos mais recentes'], ['antigos', 'Abertos há mais tempo'], ...(dados.priority ? [['prioridade', 'Maior prioridade']] : [])].map(([v, t]) => `<option value="${v}"${v === ordem ? ' selected' : ''}>${t}</option>`).join('')}
+        ${[['recentes', 'Atualizados recentemente'], ['novos', 'Abertos mais recentes'], ['antigos', 'Abertos há mais tempo'], ...(dados.priority ? [['prioridade', 'Maior prioridade']] : []), ...(dados.sla ? [['vencimento', 'Vencimento mais próximo']] : [])].map(([v, t]) => `<option value="${v}"${v === ordem ? ' selected' : ''}>${t}</option>`).join('')}
       </select>
       <div class="seg" role="group" aria-label="Visualização">
         <button type="button" data-visao="kanban" aria-pressed="${visao === 'kanban'}">Kanban</button>
@@ -534,6 +566,7 @@ function aplicarFiltro(el) {
 function passa(d, ignorarSituacao) {
   if (filtros.contato && d.contact !== filtros.contato) return false;
   if (filtros.resp && d.assigned !== filtros.resp) return false;
+  if (filtros.prazo && ROTULO_PRAZO[vencimento(d)?.tipo] !== filtros.prazo) return false;
   if (filtros.pri && d.pri !== parseInt(filtros.pri, 10)) return false;
   if (!ignorarSituacao && filtros.situacao && etapaDe(d.stage).sem !== filtros.situacao) return false;
   if (filtros.desde && new Date(d.created).getTime() < new Date(filtros.desde + 'T00:00:00').getTime()) return false;
@@ -549,6 +582,7 @@ const ORDENS = {
   recentes: (a, b) => new Date(b.modified) - new Date(a.modified),
   novos: (a, b) => new Date(b.created) - new Date(a.created),
   antigos: (a, b) => new Date(a.created) - new Date(b.created),
+  vencimento: (a, b) => (vencimento(a)?.ordem ?? 9999) - (vencimento(b)?.ordem ?? 9999) || new Date(a.created) - new Date(b.created),
   prioridade: (a, b) => (a.pri || 9) - (b.pri || 9) || new Date(a.created) - new Date(b.created),
 };
 const filtrados = () => dados.deals.filter((d) => passa(d)).sort(ORDENS[ordem]);
@@ -574,6 +608,7 @@ function renderLinha(lista) {
   if (filtros.q) ativos.push(['q', `Busca: ${filtros.q}`]);
   if (filtros.contato) ativos.push(['contato', `Solicitante: ${filtros.contato}`]);
   if (filtros.resp) ativos.push(['resp', `Responsável: ${filtros.resp}`]);
+  if (filtros.prazo) ativos.push(['prazo', `Prazo: ${filtros.prazo}`]);
   if (filtros.pri) ativos.push(['pri', `${dados.priority.label}: ${filtros.pri}`]);
   if (filtros.desde) ativos.push(['desde', `Desde ${data(filtros.desde)}`]);
   for (const [code, v] of Object.entries(filtros.campos)) if (v) ativos.push(['c:' + code, `${dados.fields.find((f) => f.code === code)?.label || code}: ${v}`]);
@@ -588,7 +623,7 @@ function cardHtml(d) {
   return `<button class="card" type="button" data-id="${d.id}">
     <span class="card__topo">${chipTipo(d)}<span class="card__id num">#${d.id}</span></span>
     <span class="card__titulo">${esc(d.title)}</span>
-    ${!fechado && (nivel(d) || d.sla) ? `<span class="card__meta">${priHtml(d)}${d.sla ? `<span class="sla" title="Prazo estimado pelo SLA">${IC.prazo}Prazo ${esc(slaTexto(d.sla))}</span>` : ''}</span>` : ''}
+    ${!fechado && (nivel(d) || d.sla) ? `<span class="card__meta">${priHtml(d)}${d.sla ? `<span class="sla" title="Prazo estimado pelo SLA">${IC.prazo}Prazo ${esc(slaTexto(d.sla))}</span>` : ''}${vencHtml(d)}</span>` : ''}
     ${nota ? `<span class="card__nota">${IC.alerta}<span>${esc(nota)}</span></span>` : ''}
     <span class="card__pessoas">
       <span class="card__pessoa"><small>Solicitante</small><span><span class="avatar" aria-hidden="true">${esc(iniciais(d.contact))}</span><span>${esc(d.contact || 'Não informado')}</span></span></span>
@@ -624,8 +659,8 @@ function render() {
       </section>`;
     }).join('')}</div>`;
   } else {
-    const cols = [['id', 'Nº'], ['title', 'Chamado'], ['etapa', 'Etapa'], ['tipo', 'Tipo'], ['contact', 'Solicitante'], ['assigned', 'Responsável'], ['pri', 'Prioridade'], ['created', 'Aberto'], ['modified', 'Atualizado']];
-    const chave = { id: (d) => d.id, title: (d) => d.title.toLowerCase(), etapa: (d) => dados.stages.findIndex((s) => s.id === d.stage), tipo: (d) => String(d.v[dados.cardField] ?? ''), contact: (d) => d.contact.toLowerCase(), assigned: (d) => d.assigned.toLowerCase(), pri: (d) => d.pri || 9, created: (d) => new Date(d.created).getTime(), modified: (d) => new Date(d.modified).getTime() };
+    const cols = [['id', 'Nº'], ['title', 'Chamado'], ['etapa', 'Etapa'], ['tipo', 'Tipo'], ['contact', 'Solicitante'], ['assigned', 'Responsável'], ['pri', 'Prioridade'], ['venc', 'Prazo'], ['created', 'Aberto'], ['modified', 'Atualizado']];
+    const chave = { id: (d) => d.id, title: (d) => d.title.toLowerCase(), etapa: (d) => dados.stages.findIndex((s) => s.id === d.stage), tipo: (d) => String(d.v[dados.cardField] ?? ''), contact: (d) => d.contact.toLowerCase(), assigned: (d) => d.assigned.toLowerCase(), pri: (d) => d.pri || 9, venc: (d) => vencimento(d)?.ordem ?? 9999, created: (d) => new Date(d.created).getTime(), modified: (d) => new Date(d.modified).getTime() };
     const linhas = [...lista];
     if (ordemLista) { const k = chave[ordemLista.col]; linhas.sort((a, b) => (k(a) > k(b) ? 1 : k(a) < k(b) ? -1 : 0) * ordemLista.dir); }
     const max = limite.lista || 100;
@@ -634,7 +669,7 @@ function render() {
       <tbody>${linhas.slice(0, max).map((d) => { const s = etapaDe(d.stage); return `<tr data-id="${d.id}" tabindex="0">
         <td class="num nowrap">#${d.id}</td><td class="t-titulo"><div>${esc(d.title)}</div></td>
         <td class="nowrap">${chipEtapa(s)}</td><td class="nowrap">${chipTipo(d)}</td>
-        <td class="nowrap">${esc(d.contact)}</td><td class="nowrap">${esc(d.assigned)}</td><td class="nowrap">${priHtml(d)}</td><td class="num nowrap">${esc(data(d.created))}</td><td class="num nowrap" title="${esc(data(d.modified, true))}">${esc(relativo(d.modified))}</td></tr>`; }).join('')}</tbody>
+        <td class="nowrap">${esc(d.contact)}</td><td class="nowrap">${esc(d.assigned)}</td><td class="nowrap">${priHtml(d)}</td><td class="nowrap">${vencHtml(d)}</td><td class="num nowrap">${esc(data(d.created))}</td><td class="num nowrap" title="${esc(data(d.modified, true))}">${esc(relativo(d.modified))}</td></tr>`; }).join('')}</tbody>
     </table></div>
     ${linhas.length > max ? `<p style="text-align:center;margin-top:12px"><button class="btn" type="button" data-mais="lista">Mostrar mais 100 de ${linhas.length - max}</button></p>` : ''}`;
   }
@@ -672,6 +707,7 @@ function abrirChamado(id, semHash) {
       ${nivel(d) || d.sla ? `<section class="bloco"><div class="duo">
         ${nivel(d) ? `<div><span class="rotulo">${esc(dados.priority.label)}</span><div style="margin-top:6px">${priHtml(d)}</div><p>${esc(nivel(d).desc)}</p></div>` : ''}
         ${d.sla ? `<div><span class="rotulo">Prazo estimado (SLA)</span><strong>${esc(slaTexto(d.sla))}</strong>
+          ${vencimento(d) ? `<div style="margin-top:8px">${vencHtml(d)}</div><p>${esc(vencimento(d).longo)}${d.sla.pausedDays ? ` O prazo já ficou suspenso por ${d.sla.pausedDays} ${d.sla.pausedDays === 1 ? 'dia útil' : 'dias úteis'}.` : ''}</p>` : ''}
           <p>${esc([d.sla.type, d.sla.size].filter(Boolean).join(' de '))}${d.sla.note ? '. ' + esc(d.sla.note) : d.sla.pending ? '. O prazo é definido quando o porte da demanda for classificado.' : '.'}</p></div>` : ''}
       </div><p style="margin:12px 0 0"><button class="link" type="button" data-regras>Entenda prioridades e prazos</button></p></section>` : ''}
       <section class="bloco"><dl class="dados">
@@ -777,7 +813,7 @@ $('#linha').addEventListener('click', (e) => {
   const b = e.target.closest('[data-limpar]');
   if (!b) return;
   const k = b.dataset.limpar;
-  if (k === '*') Object.assign(filtros, { q: '', contato: '', resp: '', pri: '', desde: '', campos: {} });
+  if (k === '*') Object.assign(filtros, { q: '', contato: '', resp: '', prazo: '', pri: '', desde: '', campos: {} });
   else if (k.startsWith('c:')) filtros.campos[k.slice(2)] = ''; else filtros[k] = '';
   montarBarra(); render();
 });

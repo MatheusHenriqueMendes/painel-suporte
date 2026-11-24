@@ -114,6 +114,27 @@
       "Pergunta: 1 dia útil.",
       "Sugestão: 3 dias úteis para análise de viabilidade."
     ],
-    "footnote": "Os prazos contam a partir da abertura e podem ser suspensos enquanto aguardamos informações, validação ou resposta do Bitrix24. Direcionamentos incorretos reiniciam o prazo."
+    "footnote": "Os prazos são contados em dias úteis (sem fins de semana e feriados nacionais) a partir da abertura do chamado. A contagem fica suspensa enquanto o chamado aguarda informações, aprovação ou validação do escritório, ou resposta do suporte do Bitrix24. Direcionamentos incorretos reiniciam o prazo.",
+    "pausedStages": [
+      "C17:FINAL_INVOICE",
+      "C17:UC_UFWM9R",
+      "C17:UC_EKTC24",
+      "C17:UC_2QLTUC",
+      "C17:UC_DXLHXL"
+    ],
+    "utcOffsetHours": -3,
+    "holidays": [
+      "01-01",
+      "04-21",
+      "05-01",
+      "09-07",
+      "10-12",
+      "11-02",
+      "11-15",
+      "11-20",
+      "12-25",
+      "2027-03-26",
+      "2028-04-14"
+    ]
   }
 }

@@ -257,6 +257,43 @@ async function collect(offices) {
     for (const c of list) companies[c.ID] = c.TITLE;
   }
 
+  // histórico de etapas dos chamados abertos: usado para descontar o tempo em etapas que suspendem o SLA
+  const history = {};
+  const paused = new Set(config.sla?.pausedStages || []);
+  const openIds = deals.filter((d) => d.CLOSED !== 'Y').map((d) => Number(d.ID));
+  if (config.sla && paused.size) {
+    try {
+      for (const ids of chunk(openIds, 50)) {
+        for (let start = 0; start !== null && start !== undefined;) {
+          const res = await call('crm.stagehistory.list', { entityTypeId: 2, order: { ID: 'ASC' }, filter: { OWNER_ID: ids }, select: ['ID', 'OWNER_ID', 'STAGE_ID', 'CREATED_TIME'], start });
+          for (const it of res.items || []) (history[it.OWNER_ID] ||= []).push({ t: new Date(it.CREATED_TIME).getTime(), stage: it.STAGE_ID });
+          start = (res.items || []).length === 50 ? start + 50 : null;
+        }
+      }
+    } catch (e) {
+      console.warn(`Aviso: não foi possível ler o histórico de etapas (${e.message}); vencimentos calculados sem suspensões.`);
+    }
+  }
+  const offsetMs = Number(config.sla?.utcOffsetHours ?? -3) * 36e5;
+  const holidays = new Set(config.sla?.holidays || []);
+  const dayStr = (ms) => new Date(ms + offsetMs).toISOString().slice(0, 10);          // data local
+  const noonOf = (str) => Date.parse(`${str}T12:00:00Z`) - offsetMs;                   // meio-dia local em UTC
+  const nextDay = (str) => new Date(Date.parse(`${str}T12:00:00Z`) + 864e5).toISOString().slice(0, 10);
+  const isBiz = (str) => { const w = new Date(`${str}T12:00:00Z`).getUTCDay(); return w !== 0 && w !== 6 && !holidays.has(str) && !holidays.has(str.slice(5)); };
+  const pausedAt = (id, ms) => { let st = null; for (const h of history[id] || []) { if (h.t <= ms) st = h.stage; else break; } return st !== null && paused.has(st); };
+  // vencimento = abertura + N dias úteis, sem contar os dias úteis passados em etapa suspensa
+  const dueOf = (d, days) => {
+    const today = dayStr(Date.now());
+    let day = dayStr(new Date(d.DATE_CREATE).getTime()), count = 0, pausedDays = 0;
+    for (let guard = 0; guard < 3000 && count < days; guard++) {
+      day = nextDay(day);
+      if (!isBiz(day)) continue;
+      if (day <= today && pausedAt(d.ID, noonOf(day))) { pausedDays++; continue; }
+      count++;
+    }
+    return { due: day, pausedDays };
+  };
+
   const ctx = { statuses, users };
 
   // prioridade (matriz) e prazo estimado pelo SLA, calculados a partir dos campos do negócio
@@ -280,7 +317,12 @@ async function collect(offices) {
     const base = { type: rule.type, size: sc.sizeNames?.[size] || '', note: rule.note || '' };
     if (val === undefined || val === null) return { ...base, pending: true };
     const [min, max = min] = [].concat(val);
-    return { ...base, min, max };
+    const out = { ...base, min, max };
+    if (d.CLOSED !== 'Y') {
+      Object.assign(out, dueOf(d, max));
+      if (paused.has(d.STAGE_ID)) out.paused = true;
+    }
+    return out;
   };
   const payloads = new Map();
   for (const office of offices) {
@@ -301,7 +343,7 @@ async function collect(offices) {
       noteField: config.cardNoteField || '',
       closedDays: Number(config.closedDays ?? 90),
       priority: config.priority ? { label: config.priority.label || 'Prioridade', levels: config.priority.levels } : null,
-      sla: config.sla ? { legend: config.sla.legend || [], footnote: config.sla.footnote || '' } : null,
+      sla: config.sla ? { legend: config.sla.legend || [], footnote: config.sla.footnote || '', holidays: config.sla.holidays || [] } : null,
       stages,
       fields: publicFields,
       deals: rows.map(([d, v]) => {

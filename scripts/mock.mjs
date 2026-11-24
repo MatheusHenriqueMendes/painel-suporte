@@ -46,7 +46,7 @@ export function payloads(config) {
       created: iso(created),
       modified: iso(created + 5e7 + i * 3e6),
       pri: (i % 5) + 1,
-      sla: i % 4 === 3 ? null : { type: 'Alteração', size: ['pequeno porte', 'médio porte', 'grande porte'][i % 3], note: '', min: [1, 5, 10][i % 3], max: [1, 5, 10][i % 3] },
+      sla: i % 4 === 3 ? null : { type: 'Alteração', size: ['pequeno porte', 'médio porte', 'grande porte'][i % 3], note: '', min: [1, 5, 10][i % 3], max: [1, 5, 10][i % 3], due: iso(created + ([1, 5, 10][i % 3] + 3) * 864e5).slice(0, 10), pausedDays: i % 2, ...(stage.id === 'C17:UC_WAIT' ? { paused: true } : {}) },
       desc: `Solicitação registrada pelo escritório.\n\n${title}. Segue o detalhamento enviado pelo solicitante para análise da equipe.`,
       v: {
         TYPE_ID: tipos[i % tipos.length],
@@ -72,7 +72,7 @@ export function payloads(config) {
     noteField: 'UF_PENDENTE',
     closedDays: 90,
     priority: config.priority ? { label: config.priority.label, levels: config.priority.levels } : null,
-    sla: config.sla ? { legend: config.sla.legend, footnote: config.sla.footnote } : null,
+    sla: config.sla ? { legend: config.sla.legend, footnote: config.sla.footnote, holidays: config.sla.holidays || [] } : null,
     stages, fields, deals,
   };
   return new Map([['demo', payload]]);
