@@ -4,13 +4,16 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "7,22,37,52 * * * *" # a cada 15 min; o GitHub trata como "melhor esforço" e pode atrasar ou pular execuções
+    # Rede de segurança: o agendamento do GitHub é "melhor esforço" e pula a maioria das execuções.
+    # Quem garante o ritmo de 15 min é o job "proxima", que redispara este workflow ao final de cada execução.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write # para o job "proxima" disparar a execução seguinte
 
 concurrency:
   group: pages
@@ -47,3 +50,19 @@ jobs:
     steps:
       - id: deploy
         uses: actions/deploy-pages@v4
+
+  # Mantém o ciclo: espera ~14 min e dispara a próxima execução deste mesmo workflow.
+  # Roda mesmo se a geração falhar (ex.: Bitrix24 fora do ar), para a cadeia não morrer.
+  # Para interromper: cancele a execução em andamento ou desative o workflow na aba Actions.
+  proxima:
+    needs: publicar
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Aguardar o próximo ciclo
+        run: sleep 840
+      - name: Disparar a próxima atualização
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}
